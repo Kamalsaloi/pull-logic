@@ -376,7 +376,7 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
 
   var q=function(sel,root){return Array.prototype.slice.call((root||panel).querySelectorAll(sel))};
   var EASE='cubic-bezier(.22,.61,.36,1)';
-  var running=[];
+  var running=[], started=false;
 
   function enter(el,delay,dx){
     return el.animate(
@@ -443,6 +443,14 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
     var c2=document.querySelector('.conn2');
     if(c2){ q('path',c2).forEach(function(pa){ add(draw(pa,3120,380)) }); add(pulse(c2,3200)); }
 
+    // watchdog: the hidden state comes from the animations' backwards fill, so if the
+    // timeline ever stalls (throttled tab, odd engine) force the end state rather than
+    // leave the hero invisible. finish() is a no-op on animations already complete.
+    clearTimeout(window.__flowGuard);
+    window.__flowGuard=setTimeout(function(){
+      running.forEach(function(a){ try{ a.finish() }catch(e){} });
+    },5200);
+
     var act=document.querySelector('.card.act');
     if(act){
       add(enter(act,3440));
@@ -456,7 +464,6 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
     if(reduce.matches){ if(replay) replay.hidden=true; return }
     if(replay){ replay.hidden=false; replay.addEventListener('click',play) }
 
-    var started=false;
     function go(){ if(started) return; started=true; play() }
 
     // autoplay: if any part of the panel is on screen at load, run straight away
@@ -470,8 +477,7 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
       },{threshold:.05}).observe(panel);
     } else { go() }
   }
-  addEventListener('load',enable);
-  if(document.readyState==='complete') enable();
+  enable();
   reduce.addEventListener&&reduce.addEventListener('change',function(){
     if(reduce.matches){ running.forEach(function(a){try{a.cancel()}catch(e){}}); if(replay) replay.hidden=true }
   });
