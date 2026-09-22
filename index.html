@@ -455,16 +455,23 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
   function enable(){
     if(reduce.matches){ if(replay) replay.hidden=true; return }
     if(replay){ replay.hidden=false; replay.addEventListener('click',play) }
-    var seen=false;
+
+    var started=false;
+    function go(){ if(started) return; started=true; play() }
+
+    // autoplay: if any part of the panel is on screen at load, run straight away
+    var box=panel.getBoundingClientRect();
+    if(box.top < innerHeight && box.bottom > 0){ setTimeout(go,250); return }
+
+    // otherwise it is below the fold, so run the moment it first appears
     if('IntersectionObserver' in window){
       new IntersectionObserver(function(es,o){
-        es.forEach(function(e){ if(e.isIntersecting && !seen){ seen=true; play() } });
-      },{threshold:.12}).observe(panel);
-    } else { play() }
-    // tall stacked layouts may never hit the threshold; don't strand the reveal
-    setTimeout(function(){ if(!seen){ seen=true; play() } },2500);
+        es.forEach(function(e){ if(e.isIntersecting){ o.disconnect(); go() } });
+      },{threshold:.05}).observe(panel);
+    } else { go() }
   }
-  enable();
+  addEventListener('load',enable);
+  if(document.readyState==='complete') enable();
   reduce.addEventListener&&reduce.addEventListener('change',function(){
     if(reduce.matches){ running.forEach(function(a){try{a.cancel()}catch(e){}}); if(replay) replay.hidden=true }
   });
