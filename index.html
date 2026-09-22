@@ -29,7 +29,7 @@ a{text-decoration:none;color:inherit}
 img{display:block;max-width:100%}
 .wrap{max-width:1440px;margin:0 auto}
 .gut{padding-inline:72px}
-@media(max-width:1200px){.gut{padding-inline:48px}}
+@media(max-width:1080px){.gut{padding-inline:44px}}
 @media(max-width:700px){.gut{padding-inline:20px}}
 
 /* ---------- nav ---------- */
@@ -223,6 +223,11 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
   .panel{padding:18px 14px;border-radius:14px;gap:20px}
   .prod img{width:56px;height:56px}
 }
+.replaywrap{display:flex;justify-content:flex-end;margin-top:12px}
+#replay{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);
+  font-family:inherit;font-size:12px;padding:6px 12px;cursor:pointer}
+#replay:hover{color:var(--text-2);border-color:#3A3937}
+#replay[hidden]{display:none}
 .tail{height:96px}
 </style></head>
 <body>
@@ -304,7 +309,7 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
             <div class="meta"><span>demand vs cover, 14 days</span><b>41 orders</b></div>
           </div>
 
-          <svg class="conn" viewBox="0 0 56 20" fill="none" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="conn conn1" viewBox="0 0 56 20" fill="none" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 10H18" stroke="var(--signal-dim)" stroke-width="1.2"/>
             <circle cx="26" cy="10" r="7" fill="var(--signal-dim)" opacity=".30"/>
             <circle cx="26" cy="10" r="3.4" fill="var(--signal)"/>
@@ -327,7 +332,7 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
             <p class="note">Ranked on cost to serve, then promise date.</p>
           </div>
 
-          <svg class="conn" viewBox="0 0 56 20" fill="none" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="conn conn2" viewBox="0 0 56 20" fill="none" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 10H18" stroke="rgba(245,165,36,.40)" stroke-width="1.2"/>
             <circle cx="26" cy="10" r="7" fill="rgba(245,165,36,.40)" opacity=".30"/>
             <circle cx="26" cy="10" r="3.4" fill="var(--amber)"/>
@@ -357,8 +362,112 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
       </div>
 
     </section>
+    <div class="replaywrap"><button id="replay" type="button">Replay the decision</button></div>
   </div>
   <div class="tail"></div>
 </main>
 </div>
+
+<script>
+(function(){
+  var panel=document.querySelector('.panel'), replay=document.getElementById('replay');
+  if(!panel) return;
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)');
+
+  var q=function(sel,root){return Array.prototype.slice.call((root||panel).querySelectorAll(sel))};
+  var EASE='cubic-bezier(.22,.61,.36,1)';
+  var running=[];
+
+  function enter(el,delay,dx){
+    return el.animate(
+      [{opacity:0,transform:'translateX('+(dx==null?-14:dx)+'px)'},{opacity:1,transform:'none'}],
+      {duration:440,delay:delay,easing:EASE,fill:'backwards'});
+  }
+  function draw(path,delay,dur){
+    var len;
+    try{ len=path.getTotalLength() }catch(e){ return null }
+    if(!len) return null;
+    return path.animate(
+      [{strokeDasharray:len+' '+len,strokeDashoffset:len},
+       {strokeDasharray:len+' '+len,strokeDashoffset:0}],
+      {duration:dur||620,delay:delay,easing:EASE,fill:'backwards'});
+  }
+  function pop(el,delay){
+    return el.animate([{opacity:0},{opacity:1}],
+      {duration:320,delay:delay,easing:EASE,fill:'backwards'});
+  }
+  // a pulse that rides the connector so the eye is pulled rightward
+  function pulse(svg,delay){
+    var dot=svg.querySelector('circle:last-of-type');
+    if(!dot) return null;
+    return dot.animate(
+      [{transform:'translateX(-22px)',opacity:0,offset:0},
+       {transform:'translateX(-14px)',opacity:1,offset:.25},
+       {transform:'translateX(16px)',opacity:1,offset:.85},
+       {transform:'translateX(22px)',opacity:0,offset:1}],
+      {duration:620,delay:delay,easing:'cubic-bezier(.4,0,.5,1)',fill:'backwards'});
+  }
+
+  function play(){
+    running.forEach(function(a){try{a.cancel()}catch(e){}});
+    running=[];
+    var add=function(a){ if(a) running.push(a) };
+
+    q('.src').forEach(function(el,i){ add(enter(el,i*95)) });
+
+    var cv=document.querySelector('.converge');
+    if(cv){
+      q('path',cv).forEach(function(pa,i){ add(draw(pa,400+i*45,640)) });
+      q('circle',cv).forEach(function(c){ add(pop(c,1010)) });
+    }
+
+    var risk=document.querySelector('.card.risk');
+    if(risk){
+      add(enter(risk,1120));
+      var sp=q('svg path',risk);
+      if(sp[0]) add(pop(sp[0],1520));            // area fill
+      if(sp[1]) add(draw(sp[1],1380,820));       // the line itself
+    }
+
+    var c1=document.querySelector('.conn1');
+    if(c1){ q('path',c1).forEach(function(pa){ add(draw(pa,2060,380)) }); add(pulse(c1,2140)); }
+
+    var dec=document.querySelector('.card.decide');
+    if(dec){
+      add(enter(dec,2380));
+      add(pop(dec.querySelector('.chead'),2520));
+      q('.opt',dec).forEach(function(o,i){ add(enter(o,2620+i*110,-8)) });
+      add(pop(dec.querySelector('.note'),3000));
+    }
+
+    var c2=document.querySelector('.conn2');
+    if(c2){ q('path',c2).forEach(function(pa){ add(draw(pa,3120,380)) }); add(pulse(c2,3200)); }
+
+    var act=document.querySelector('.card.act');
+    if(act){
+      add(enter(act,3440));
+      add(pop(act.querySelector('img'),3580));
+      add(enter(act.querySelector('.route'),3720,-8));
+      add(enter(act.querySelector('.tot'),3860,-8));
+    }
+  }
+
+  function enable(){
+    if(reduce.matches){ if(replay) replay.hidden=true; return }
+    if(replay){ replay.hidden=false; replay.addEventListener('click',play) }
+    var seen=false;
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(es,o){
+        es.forEach(function(e){ if(e.isIntersecting && !seen){ seen=true; play() } });
+      },{threshold:.12}).observe(panel);
+    } else { play() }
+    // tall stacked layouts may never hit the threshold; don't strand the reveal
+    setTimeout(function(){ if(!seen){ seen=true; play() } },2500);
+  }
+  enable();
+  reduce.addEventListener&&reduce.addEventListener('change',function(){
+    if(reduce.matches){ running.forEach(function(a){try{a.cancel()}catch(e){}}); if(replay) replay.hidden=true }
+  });
+})();
+</script>
 </body></html>
