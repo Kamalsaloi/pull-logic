@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pull Logic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#0D0D0C; --panel:#131312; --line:#2B2A28; --line-soft:#1C1C1B;
+  --text:#EDEDEA; --text-2:#B6B5B1; --muted:#8B8A85; --dim:#82817C;
+  --amber:#F5A524; --amber-ink:#1A1206; --risk:#E3594B;
+  --sans:'Schibsted Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1440px;margin:0 auto}
+.pad{padding:0 112px}
+@media(max-width:900px){.pad{padding:0 24px}}
+nav{display:flex;align-items:center;justify-content:space-between;height:72px;border-bottom:1px solid var(--line-soft)}
+.navlinks{display:flex;gap:30px}
+.navlinks a,.navright a{color:var(--text-2);text-decoration:none;font-size:14px}
+.navright{display:flex;align-items:center;gap:20px}
+.ghost{border:1px solid var(--line);border-radius:6px;padding:9px 16px;color:var(--text);font-size:14px;text-decoration:none}
+.ribbon{display:flex;align-items:center;justify-content:center;gap:12px;height:48px;background:#141413;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-2);position:relative}
+.ribbon a{color:var(--amber);text-decoration:none;font-weight:500}
+.ribbon button{position:absolute;right:112px;background:none;border:0;color:var(--dim);cursor:pointer;font-size:15px;line-height:1}
+h1{font-size:72px;font-weight:600;letter-spacing:-.03em;line-height:.96;margin-top:72px}
+@media(max-width:900px){h1{font-size:40px}}
+.sub{display:flex;align-items:flex-end;justify-content:space-between;gap:48px;margin-top:28px;flex-wrap:wrap}
+.sub p{max-width:600px;font-size:19px;line-height:30px;color:var(--text-2)}
+.ctas{display:flex;gap:12px}
+.btn{border-radius:6px;padding:13px 22px;font-size:15px;font-weight:600;text-decoration:none;background:var(--amber);color:var(--amber-ink)}
+.btn.sec{background:none;border:1px solid var(--line);color:var(--text);font-weight:500}
+
+.panel{margin-top:58px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.phead{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 24px;border-bottom:1px solid var(--line-soft);background:#161615;font-size:13px}
+.phead .id{font-weight:500}.phead .loc{color:var(--dim);margin-left:8px}
+.phead time{font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+.spine{padding:22px 24px 0}
+.spinebar{position:relative;height:9px}
+.spinebar .rail{position:absolute;top:4px;left:4px;right:4px;height:1px;background:var(--line)}
+.spinebar .fill{position:absolute;top:4px;left:4px;height:1px;background:var(--amber);width:0}
+.stages{display:flex;margin-top:10px}
+.stage{flex:1;background:none;border:0;padding:0;text-align:left;font-family:inherit;cursor:pointer}
+.stage:last-child{flex:0 0 auto}
+.stage b{display:block;font-size:14px;font-weight:500;color:#4F4E4A;transition:color .35s}
+.stage i{display:block;font-style:normal;font-size:12px;color:#3C3B38;margin-top:3px;transition:color .35s}
+.stage.on b{color:var(--text)}.stage.on i{color:var(--dim)}
+.dot{position:absolute;top:.5px;width:8px;height:8px;border-radius:50%;background:#2B2A28;transition:background .3s}
+.dot.on{background:var(--amber)}
+
+.legend{display:flex;gap:24px;padding:15px 24px 0;font-size:12px;color:var(--dim);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:8px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.swline{width:16px;height:0;border-top:1px dashed #9A9892;display:inline-block}
+
+.stage3d{position:relative;height:430px;margin:4px 24px 0;cursor:grab}
+.stage3d:active{cursor:grabbing}
+#cv{display:block;width:100%;height:100%}
+.lay{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lb{position:absolute;transform:translate(-50%,0);white-space:nowrap;text-align:center;transition:opacity .4s}
+.lb .nm{font-size:12px;color:var(--dim)}
+.lb .dy{font-family:var(--mono);font-size:12px;color:#605F5A;margin-top:2px}
+.lb.focus .nm{font-size:13px;color:var(--text-2);font-weight:500}
+.co{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;text-align:center;font-size:13px;opacity:0;transition:opacity .45s}
+.rt{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;opacity:0;transition:opacity .45s}
+.rt .a{font-size:13px}.rt .b{font-family:var(--mono);font-size:12px;margin-top:2px}
+
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:24px;height:46px;padding:0 24px;border-top:1px solid var(--line-soft);background:#161615;font-size:12px;color:var(--muted)}
+.pfoot .out{opacity:0;transition:opacity .5s}.pfoot .out.on{opacity:1}
+.pfoot .amt{color:var(--text);font-family:var(--mono)}
+.pfoot a{color:var(--amber);text-decoration:none;font-weight:500;white-space:nowrap}
+.controls{display:flex;align-items:center;gap:14px;margin-top:16px}
+.controls button{background:none;border:1px solid var(--line);border-radius:6px;color:var(--text-2);font-family:inherit;font-size:12px;padding:6px 12px;cursor:pointer}
+.controls button:hover{color:var(--text);border-color:#3A3937}
+.controls .note{font-size:12px;color:var(--dim)}
+.tail{height:88px}
+#fallback{display:none;padding:40px 24px;color:var(--muted);font-size:14px}
+</style></head>
+<body>
+<div class="wrap">
+
+<nav class="pad">
+  <div style="display:flex;align-items:center;gap:10px;white-space:nowrap">
+    <svg width="20" height="20" viewBox="0 0 20 20"><rect x=".5" y=".5" width="19" height="19" rx="4.5" fill="none" stroke="#33322F"/><rect x="4" y="9" width="4.5" height="7" rx="1.5" fill="#F5A524"/><rect x="11.5" y="4" width="4.5" height="12" rx="1.5" fill="#5F5E5A"/></svg>
+    <span style="font-size:17px;font-weight:600;letter-spacing:-.02em">Pull Logic</span>
+  </div>
+  <div class="navlinks"><a href="#">Platform</a><a href="#">How it works</a><a href="#">Industries</a><a href="#">Resources</a><a href="#">Company</a></div>
+  <div class="navright"><a href="#" style="color:var(--muted)">Log in</a><a href="#" class="ghost">Book a demo</a></div>
+</nav>
+
+<div class="ribbon">
+  NAED selects Pull Logic and IDEA to build ProjectNexus, industry-owned order visibility for the electrical channel.
+  <a href="#">Read it &rarr;</a>
+  <button aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>
+</div>
+
+<main class="pad">
+  <h1>You have the inventory.<br>It&rsquo;s in the wrong place.</h1>
+  <div class="sub">
+    <p>Pull Logic watches every SKU at every location, catches the availability gaps days before they cost you an order, then fixes them inside the ERP you already run: replenish, rebalance, allocate, substitute.</p>
+    <div class="ctas"><a class="btn" href="#">Book a demo</a><a class="btn sec" href="#">See how it works</a></div>
+  </div>
+
+  <section class="panel">
+    <div class="phead"><div><span class="id">SKU 4471-A</span><span class="loc">5 distribution centres</span></div><time>14:32:07 CT, today</time></div>
+
+    <div class="spine">
+      <div class="spinebar" id="bar"><div class="rail"></div><div class="fill" id="fill"></div></div>
+      <div class="stages">
+        <button class="stage" data-i="0"><b>Signal</b><i>read every location</i></button>
+        <button class="stage" data-i="1"><b>Risk</b><i>Denver drops under the line</i></button>
+        <button class="stage" data-i="2"><b>Decision</b><i>three routes priced</i></button>
+        <button class="stage" data-i="3"><b>Action</b><i>stock moved, order written</i></button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="sw" style="background:#4A4844"></i>block height = days of cover</span>
+      <span><i class="swline"></i>the plane is the 14-day target</span>
+      <span><i class="sw" style="background:#E3594B"></i>under the plane, will run out</span>
+      <span><i class="sw" style="background:#7A756B"></i>surplus</span>
+    </div>
+
+    <div class="stage3d" id="st"><canvas id="cv"></canvas><div class="lay" id="lay"></div></div>
+    <div id="fallback">This view needs WebGL. The same decision is shown as a flat chart in hero-animated.html.</div>
+
+    <div class="pfoot">
+      <span class="out" id="out">Transfer order <span class="amt">TO-88412</span> written to SAP. <span class="amt">$84,200</span> of orders held.</span>
+      <a href="#">See the decision trace &rarr;</a>
+    </div>
+  </section>
+
+  <div class="controls">
+    <button id="toggle">Pause</button><button id="replay">Replay</button>
+    <span class="note">Runs once, and you can drag the scene to look around.</span>
+  </div>
+  <div class="tail"></div>
+</main>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+
+const $=id=>document.getElementById(id);
+const host=$("st"), lay=$("lay");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- scene ----------
+const scene=new THREE.Scene();
+const renderer=new THREE.WebGLRenderer({canvas:$("cv"),antialias:true,alpha:true});
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const FRUST=13.5;
+let cam=new THREE.OrthographicCamera(-FRUST,FRUST,FRUST,-FRUST,.1,300);
+let az=Math.PI*0.25, el=Math.atan(1/Math.sqrt(2))+0.10, RAD=90;
+function placeCam(){
+  cam.position.set(RAD*Math.cos(el)*Math.sin(az), RAD*Math.sin(el), RAD*Math.cos(el)*Math.cos(az));
+  cam.lookAt(-2,3.2,1);
+}
+function resize(){
+  const w=host.clientWidth,h=host.clientHeight,a=w/h;
+  cam.left=-FRUST*a; cam.right=FRUST*a; cam.top=FRUST; cam.bottom=-FRUST;
+  cam.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(w,h,false);
+}
+placeCam();
+
+scene.add(new THREE.AmbientLight(0xffffff,.55));
+const key=new THREE.DirectionalLight(0xfff0dc,1.5);
+key.position.set(22,34,16); key.castShadow=true;
+key.shadow.mapSize.set(2048,2048);
+const d=34; Object.assign(key.shadow.camera,{left:-d,right:d,top:d,bottom:-d,near:1,far:120});
+scene.add(key);
+scene.add(new THREE.DirectionalLight(0x8899bb,.25).translateX(-20).translateY(10).translateZ(-18));
+
+// floor
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),
+  new THREE.ShadowMaterial({opacity:.5}));
+floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+const grid=new THREE.GridHelper(58,19,0x2A2826,0x1F1E1C);
+grid.material.transparent=true; grid.material.opacity=0; scene.add(grid);
+
+// ---------- the network ----------
+const DAY=0.34, TARGET=14;
+const NODES=[
+  {k:"sea",name:"Seattle",     x:-22,z:-2, cover:16},
+  {k:"den",name:"Denver",      x:-10,z: 3, cover:6 },
+  {k:"dal",name:"Dallas",      x: -3,z: 9, cover:19},
+  {k:"kc", name:"Kansas City", x:  5,z: 0, cover:34},
+  {k:"chi",name:"Chicago",     x: 19,z:-5, cover:21}
+];
+const COL={low:0xE3594B, ok:0x4A4844, surplus:0x7A756B, fixed:0xF5A524};
+const SIDE=3.2;
+
+for(const n of NODES){
+  n.mat=new THREE.MeshStandardMaterial({color:COL.ok,roughness:.72,metalness:.04});
+  n.mesh=new THREE.Mesh(new THREE.BoxGeometry(SIDE,1,SIDE),n.mat);
+  n.mesh.castShadow=true; n.mesh.receiveShadow=true;
+  n.mesh.position.set(n.x,0,n.z); scene.add(n.mesh);
+  // footprint outline so an empty site still reads as a site
+  const pad=new THREE.Mesh(new THREE.PlaneGeometry(SIDE+1.1,SIDE+1.1),
+    new THREE.MeshBasicMaterial({color:0x232220,transparent:true,opacity:.9}));
+  pad.rotation.x=-Math.PI/2; pad.position.set(n.x,.02,n.z); scene.add(pad);
+  n.h=0;
+}
+
+// the target plane — the whole point of doing this in real 3D
+const planeY=TARGET*DAY;
+const tPlane=new THREE.Mesh(new THREE.PlaneGeometry(58,34),
+  new THREE.MeshBasicMaterial({color:0xBFC0BB,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));
+tPlane.rotation.x=-Math.PI/2; tPlane.position.y=planeY; scene.add(tPlane);
+const tEdge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(58,34)),
+  new THREE.LineBasicMaterial({color:0x9A9892,transparent:true,opacity:0}));
+tEdge.rotation.x=-Math.PI/2; tEdge.position.y=planeY; scene.add(tEdge);
+
+// ---------- routes ----------
+const den=NODES.find(n=>n.k==="den"), kc=NODES.find(n=>n.k==="kc");
+const ROUTES=[
+  {k:"kc", a:"340 units, 2 days", b:"$310",                   chosen:true,  off:[.50,-34]},
+  {k:"dal",a:"340 units, 4 days", b:"$980",                   chosen:false, off:[.10,-44]},
+  {k:"chi",a:"blocked",           b:"contract on 2 accounts", chosen:false, off:[.10,-40]}
+];
+for(const r of ROUTES){
+  const s=NODES.find(n=>n.k===r.k);
+  const from=new THREE.Vector3(s.x, s.cover*DAY+.6, s.z);
+  const to  =new THREE.Vector3(den.x, planeY+2.2, den.z);
+  const mid =from.clone().add(to).multiplyScalar(.5);
+  mid.y=Math.max(from.y,to.y)+6.5;
+  r.curve=new THREE.QuadraticBezierCurve3(from,mid,to);
+  r.mat=new THREE.MeshBasicMaterial({color:r.chosen?0xF5A524:0x55514A,transparent:true,opacity:0});
+  r.mesh=new THREE.Mesh(new THREE.TubeGeometry(r.curve,64,r.chosen?.19:.07,8,false),r.mat);
+  scene.add(r.mesh);
+  if(r.chosen){
+    r.haloMat=new THREE.MeshBasicMaterial({color:0xF5A524,transparent:true,opacity:0,depthWrite:false});
+    r.halo=new THREE.Mesh(new THREE.TubeGeometry(r.curve,64,.52,8,false),r.haloMat);
+    scene.add(r.halo);
+  }
+}
+const chosen=ROUTES[0];
+const pkt=new THREE.Mesh(new THREE.SphereGeometry(.52,20,20),
+  new THREE.MeshBasicMaterial({color:0xFFCB5C}));
+pkt.visible=false; scene.add(pkt);
+
+// ---------- html labels projected from 3d ----------
+function mk(cls,html){const e=document.createElement("div");e.className=cls;e.innerHTML=html;lay.appendChild(e);return e}
+for(const n of NODES) n.el=mk("lb"+(n.k==="den"?" focus":""),`<div class="nm">${n.name}</div><div class="dy">0 days</div>`);
+const cRisk=mk("co",`<span style="color:#E3594B;font-weight:500">8 days under the line, 41 orders exposed</span>`);
+const cRich=mk("co",`<span style="color:#9A9892">more than double what it needs</span>`);
+const cFix =mk("co",`<span style="color:#F5A524;font-weight:500">+340 units, back above the line on day 2</span>`);
+for(const r of ROUTES) r.el=mk("rt",
+  `<div class="a" style="color:${r.chosen?"#F5A524":"#9A9892"};font-weight:${r.chosen?500:400}">${r.a}</div>`+
+  `<div class="b" style="color:${r.chosen?"#C98A22":"#6B6A65"}">${r.b}</div>`);
+
+const v=new THREE.Vector3();
+function project(p,eln,dy){
+  v.copy(p).project(cam);
+  const w=host.clientWidth,h=host.clientHeight;
+  eln.style.left=(( v.x*.5+.5)*w).toFixed(1)+"px";
+  eln.style.top =((-v.y*.5+.5)*h+(dy||0)).toFixed(1)+"px";
+}
+
+// ---------- timeline ----------
+const STAGES=[0,1800,3400,5400], END=8800;
+const btns=[...document.querySelectorAll(".stage")], bar=$("bar");
+const dots=STAGES.map((_,i)=>{const e=document.createElement("div");e.className="dot";
+  e.style.left=(i/(STAGES.length-1)*100)+"%"; if(i===STAGES.length-1)e.style.marginLeft="-8px";
+  bar.appendChild(e); return e});
+const ease=p=>p<0?0:p>1?1:1-Math.pow(1-p,3);
+const seg=(t,a,b)=>ease((t-a)/(b-a));
+
+function apply(t){
+  grid.material.opacity=seg(t,0,700)*.9;
+
+  NODES.forEach((n,i)=>{
+    const p=seg(t,200+i*120,200+i*120+760);
+    let target=n.cover;
+    if(n===den && t>6000) target=6+16*ease((t-6000)/950);
+    n.h=Math.max(.001,target*DAY*p);
+    n.mesh.scale.y=n.h; n.mesh.position.y=n.h/2;
+    let tone="ok";
+    if(n===den) tone = t>6000?"fixed":(t>1900?"low":"ok");
+    else if(n.cover>=TARGET*2 && t>1900) tone="surplus";
+    n.mat.color.setHex(COL[tone]);
+    n.mat.emissive.setHex(tone==="fixed"?0x3a2404:0x000000);
+    project(new THREE.Vector3(n.x,0,n.z),n.el,16);
+    n.el.style.opacity=p;
+    n.el.querySelector(".dy").textContent=Math.round(target*p)+" days";
+    n.el.querySelector(".dy").style.color =
+      n===den ? (t>6000?"#F5A524":(t>1900?"#E3594B":"#605F5A")) : "#605F5A";
+  });
+
+  const pl=seg(t,1750,2500)*(t>6800?.45:1);
+  tPlane.material.opacity=pl*.042; tEdge.material.opacity=pl*.80;
+
+  project(new THREE.Vector3(den.x,Math.max(den.h,planeY)+2.6,den.z),cRisk);
+  project(new THREE.Vector3(den.x,Math.max(den.h,planeY)+2.6,den.z),cFix);
+  project(new THREE.Vector3(kc.x,kc.h+2.2,kc.z),cRich);
+  cRisk.style.opacity = t>3300?0:seg(t,2200,2800);
+  cRich.style.opacity = t>3300?0:seg(t,2600,3100);
+  cFix .style.opacity = seg(t,6300,6900);
+
+  ROUTES.forEach((r,i)=>{
+    const a=3500+i*280, ap=seg(t,a,a+620), drop=r.chosen?0:seg(t,5100,5700);
+    r.mat.opacity=ap*(1-drop*.85);
+    if(r.chosen) r.haloMat.opacity=seg(t,4900,5500)*.10;
+    project(r.curve.getPoint(r.off[0]),r.el,r.off[1]);
+    r.el.style.opacity=ap*(1-drop);
+  });
+
+  const pk=(t-5400)/800;
+  if(pk>0&&pk<=1){pkt.visible=true;pkt.position.copy(chosen.curve.getPoint(ease(pk)))}
+  else pkt.visible=false;
+
+  $("out").classList.toggle("on",t>=7000);
+  let si=0; STAGES.forEach((s,i)=>{if(t>=s)si=i});
+  btns.forEach((b,i)=>b.classList.toggle("on",i<=si));
+  dots.forEach((x,i)=>x.classList.toggle("on",i<=si));
+  const pr=Math.min(1,t/STAGES[STAGES.length-1]);
+  $("fill").style.width=`calc(${pr*100}% - ${pr*8}px)`;
+}
+
+// ---------- drag to look ----------
+let drag=false,px=0;
+host.addEventListener("pointerdown",e=>{drag=true;px=e.clientX;host.setPointerCapture(e.pointerId)});
+host.addEventListener("pointerup",  e=>{drag=false});
+host.addEventListener("pointermove",e=>{ if(!drag)return;
+  az-= (e.clientX-px)*0.006; px=e.clientX; placeCam(); apply(t); });
+
+// ---------- loop ----------
+let t=0,last=null,playing=!reduce;
+function frame(now){
+  if(last===null)last=now; const dt=now-last; last=now;
+  if(playing){ t+=dt; if(t>=END){t=END;playing=false;$("toggle").textContent="Replay"} apply(t) }
+  renderer.render(scene,cam); requestAnimationFrame(frame);
+}
+$("toggle").onclick=function(){ if(t>=END){t=0;playing=true;this.textContent="Pause";return}
+  playing=!playing; this.textContent=playing?"Pause":"Play" };
+$("replay").onclick=()=>{t=0;playing=true;$("toggle").textContent="Pause"};
+btns.forEach(b=>b.onclick=()=>{t=STAGES[+b.dataset.i];playing=false;$("toggle").textContent="Play";apply(t)});
+addEventListener("resize",()=>{resize();apply(t)});
+
+resize();
+const seek=/[?&#]t=(\d+)/.exec(location.href);
+if(seek){t=Math.min(END,+seek[1]);playing=false;$("toggle").textContent="Play"}
+else if(reduce){t=END;playing=false;$("toggle").textContent="Play"}
+apply(t);
+requestAnimationFrame(frame);
+</script>
+<script>
+addEventListener("error",e=>{ if(String(e.message).match(/three|module|WebGL/i)){
+  document.getElementById("st").style.display="none";
+  document.getElementById("fallback").style.display="block"; }},true);
+</script>
+</body></html>

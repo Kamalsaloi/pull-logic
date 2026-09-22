@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pull Logic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#0D0D0C; --panel:#131312; --line:#2B2A28; --line-soft:#1C1C1B;
+  --text:#EDEDEA; --text-2:#B6B5B1; --muted:#8B8A85; --dim:#82817C;
+  --amber:#F5A524; --amber-ink:#1A1206; --risk:#E3594B;
+  --sans:'Schibsted Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1440px;margin:0 auto}
+.pad{padding:0 112px}
+@media(max-width:900px){.pad{padding:0 24px}}
+
+nav{display:flex;align-items:center;justify-content:space-between;height:72px;border-bottom:1px solid var(--line-soft)}
+.navlinks{display:flex;gap:30px}
+.navlinks a,.navright a{color:var(--text-2);text-decoration:none;font-size:14px}
+.navright{display:flex;align-items:center;gap:20px}
+.ghost{border:1px solid var(--line);border-radius:6px;padding:9px 16px;color:var(--text);font-size:14px;text-decoration:none}
+
+.ribbon{display:flex;align-items:center;justify-content:center;gap:12px;height:48px;background:#141413;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-2);position:relative}
+.ribbon a{color:var(--amber);text-decoration:none;font-weight:500}
+.ribbon button{position:absolute;right:112px;background:none;border:0;color:var(--dim);cursor:pointer;font-size:15px;line-height:1}
+
+h1{font-size:72px;font-weight:600;letter-spacing:-.03em;line-height:.96;margin-top:76px}
+@media(max-width:900px){h1{font-size:40px}}
+.sub{display:flex;align-items:flex-end;justify-content:space-between;gap:48px;margin-top:30px;flex-wrap:wrap}
+.sub p{max-width:600px;font-size:19px;line-height:30px;color:var(--text-2)}
+.ctas{display:flex;gap:12px}
+.btn{border-radius:6px;padding:13px 22px;font-size:15px;font-weight:600;text-decoration:none;background:var(--amber);color:var(--amber-ink)}
+.btn.sec{background:none;border:1px solid var(--line);color:var(--text);font-weight:500}
+
+/* ---- the panel: no cards, no gradients ---- */
+.panel{margin-top:70px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.phead{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 24px;border-bottom:1px solid var(--line-soft);background:#161615;font-size:13px}
+.phead .id{font-weight:500}.phead .loc{color:var(--dim);margin-left:8px}
+.phead time{font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+.spine{padding:26px 24px 0}
+.spinebar{position:relative;height:9px}
+.spinebar .rail{position:absolute;top:4px;left:4px;right:4px;height:1px;background:var(--line)}
+.spinebar .fill{position:absolute;top:4px;left:4px;height:1px;background:var(--amber);width:0}
+.stages{display:flex;margin-top:10px}
+.stage{flex:1;background:none;border:0;padding:0;text-align:left;font-family:inherit;font-size:14px;font-weight:500;color:#4F4E4A;cursor:pointer;transition:color .35s}
+.stage:last-child{flex:0 0 auto}
+.stage.on{color:var(--text)}
+.dot{position:absolute;top:.5px;width:8px;height:8px;border-radius:50%;background:#2B2A28;transition:background .3s,transform .3s}
+.dot.on{background:var(--amber)}
+
+.plot{padding:6px 24px 0}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.ink{opacity:0;transition:opacity .45s}
+.ink.on{opacity:1}
+
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:24px;height:46px;padding:0 24px;border-top:1px solid var(--line-soft);background:#161615;font-size:12px;color:var(--muted)}
+.pfoot .out{opacity:0;transition:opacity .5s}
+.pfoot .out.on{opacity:1}
+.pfoot .amt{color:var(--text);font-family:var(--mono)}
+.pfoot a{color:var(--amber);text-decoration:none;font-weight:500;white-space:nowrap}
+
+.controls{display:flex;align-items:center;gap:14px;margin-top:16px;padding:0 2px}
+.controls button{background:none;border:1px solid var(--line);border-radius:6px;color:var(--text-2);
+  font-family:inherit;font-size:12px;padding:6px 12px;cursor:pointer}
+.controls button:hover{color:var(--text);border-color:#3A3937}
+.controls .note{font-size:12px;color:var(--dim)}
+.tail{height:88px}
+@media(prefers-reduced-motion:reduce){.ink{opacity:1!important}}
+</style></head>
+<body>
+<div class="wrap">
+
+<nav class="pad">
+  <div style="display:flex;align-items:center;gap:10px;white-space:nowrap">
+    <svg width="20" height="20" viewBox="0 0 20 20"><rect x=".5" y=".5" width="19" height="19" rx="4.5" fill="none" stroke="#33322F"/><rect x="4" y="9" width="4.5" height="7" rx="1.5" fill="#F5A524"/><rect x="11.5" y="4" width="4.5" height="12" rx="1.5" fill="#5F5E5A"/></svg>
+    <span style="font-size:17px;font-weight:600;letter-spacing:-.02em">Pull Logic</span>
+  </div>
+  <div class="navlinks"><a href="#">Platform</a><a href="#">How it works</a><a href="#">Industries</a><a href="#">Resources</a><a href="#">Company</a></div>
+  <div class="navright"><a href="#" style="color:var(--muted)">Log in</a><a href="#" class="ghost">Book a demo</a></div>
+</nav>
+
+<div class="ribbon">
+  NAED selects Pull Logic and IDEA to build ProjectNexus, industry-owned order visibility for the electrical channel.
+  <a href="#">Read it &rarr;</a>
+  <button aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>
+</div>
+
+<main class="pad">
+  <h1>You have the inventory.<br>It&rsquo;s in the wrong place.</h1>
+  <div class="sub">
+    <p>Pull Logic watches every SKU at every location, catches the availability gaps days before they cost you an order, then fixes them inside the ERP you already run: replenish, rebalance, allocate, substitute.</p>
+    <div class="ctas"><a class="btn" href="#">Book a demo</a><a class="btn sec" href="#">See how it works</a></div>
+  </div>
+
+  <section class="panel" aria-label="How one availability risk is detected and resolved">
+    <div class="phead"><div><span class="id">Decision 4471-A</span><span class="loc">Denver DC</span></div><time>14:32:07 CT, today</time></div>
+
+    <div class="spine">
+      <div class="spinebar" id="bar"><div class="rail"></div><div class="fill" id="fill"></div></div>
+      <div class="stages" id="stages">
+        <button class="stage" data-i="0">Signal</button>
+        <button class="stage" data-i="1">Risk</button>
+        <button class="stage" data-i="2">Decision</button>
+        <button class="stage" data-i="3">Action</button>
+      </div>
+    </div>
+
+    <div class="plot">
+      <svg viewBox="0 0 1118 300" role="img" aria-label="Projected units on hand at Denver DC over sixteen days. Without action the shelf is empty from day six to day fifteen. Pulling 340 units from Kansas City keeps it stocked from day two.">
+        <line x1="20" y1="200" x2="1080" y2="200" stroke="#2B2A28" stroke-dasharray="2 6"/>
+        <line x1="20" y1="236" x2="1080" y2="236" stroke="#2B2A28"/>
+        <text x="20" y="194" font-size="12" fill="#605F5A">safety stock</text>
+        <text x="20" y="286" font-size="12" fill="#82817C" font-family="IBM Plex Mono">today</text>
+        <text x="1080" y="286" text-anchor="end" font-size="12" fill="#82817C" font-family="IBM Plex Mono">16 days</text>
+
+        <!-- 1 signal: current position + projection -->
+        <circle cx="20" cy="142.4" r="3" fill="#8B8A85" class="ink" id="i-now"/>
+        <text x="20" y="131" font-size="13" fill="#8B8A85" class="ink" id="t-now">312 on hand</text>
+        <path id="p-proj" d="M20 142.4 L417.5 236" stroke="#E3594B" stroke-opacity=".45" stroke-width="1.5" fill="none"/>
+
+        <!-- 2 risk -->
+        <path id="p-empty" d="M417.5 236 L1013.75 236" stroke="#E3594B" stroke-width="3.5" fill="none"/>
+        <line x1="1013.75" y1="228" x2="1013.75" y2="244" stroke="#6F6E69" class="ink" id="i-tick"/>
+        <text x="430" y="260" font-size="13" fill="#E3594B" class="ink" id="t-empty">nine days with an empty shelf, 41 orders exposed</text>
+
+        <!-- 3 decision: the alternative that was weighed and rejected -->
+        <path id="p-exp" d="M417.5 236 L483.75 236 L483.75 95 L1080 162.5" stroke="#55544F" stroke-width="1.25" stroke-dasharray="4 5" fill="none"/>
+        <text x="496" y="90" font-size="13" fill="#82817C" class="ink" id="t-exp">expedite the supplier: lands day 7, still a day short</text>
+        <text x="1006" y="218" text-anchor="end" font-size="13" fill="#82817C" class="ink" id="t-wait">wait for the supplier: lands day 15</text>
+
+        <!-- 4 action -->
+        <line id="l-drop" x1="152.5" y1="71.6" x2="152.5" y2="236" stroke="#F5A524" stroke-opacity=".18"/>
+        <path id="p-fix" d="M20 142.4 L152.5 173.6 L152.5 71.6 L1080 176.6" stroke="#F5A524" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <circle id="i-hit" cx="152.5" cy="71.6" r="4.5" fill="#F5A524" class="ink"/>
+        <text x="166" y="66" font-size="13" fill="#F5A524" class="ink" id="t-fix">340 units pulled from Kansas City, on the shelf day 2</text>
+      </svg>
+    </div>
+
+    <div class="pfoot">
+      <span class="out" id="out">Transfer order <span class="amt">TO-88412</span> written to SAP. <span class="amt">$84,200</span> of orders held.</span>
+      <a href="#">See the decision trace &rarr;</a>
+    </div>
+  </section>
+
+  <div class="controls">
+    <button id="toggle" aria-label="Pause or play">Pause</button>
+    <button id="replay">Replay</button>
+    <span class="note">Runs once. Nothing here moves on a timer you can&rsquo;t stop.</span>
+  </div>
+  <div class="tail"></div>
+</main>
+</div>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(id){return document.getElementById(id)};
+
+  // paths that draw themselves
+  var draws = [
+    {el:$('p-proj'), a:150,  b:1500},
+    {el:$('p-empty'),a:1500, b:2700},
+    {el:$('p-exp'),  a:3100, b:4200},
+    {el:$('p-fix'),  a:5000, b:6600}
+  ];
+  draws.forEach(function(d){
+    d.len = d.el.getTotalLength();
+    d.el.style.strokeDasharray = d.len;
+    d.el.style.strokeDashoffset = d.len;
+  });
+  $('l-drop').style.opacity = 0;
+
+  // things that fade in
+  var fades = [
+    {el:$('i-now'), t:250},{el:$('t-now'), t:400},
+    {el:$('t-empty'),t:2500},{el:$('i-tick'),t:2700},
+    {el:$('t-exp'), t:4100},{el:$('t-wait'),t:4400},
+    {el:$('t-fix'), t:6100},{el:$('i-hit'), t:6100},
+    {el:$('out'),   t:6900}
+  ];
+
+  // stage windows drive the spine
+  var stages = [0,1500,3100,5000], END = 8200;
+  var btns = [].slice.call(document.querySelectorAll('.stage'));
+  var dots = stages.map(function(_,i){
+    var d = document.createElement('div');
+    d.className = 'dot';
+    d.style.left = (i/(stages.length-1)*100) + '%';
+    if(i===stages.length-1) d.style.marginLeft = '-8px';
+    $('bar').appendChild(d); return d;
+  });
+
+  var t = 0, last = null, playing = !reduce;
+
+  function apply(time){
+    draws.forEach(function(d){
+      var p = (time - d.a) / (d.b - d.a);
+      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      d.el.style.strokeDashoffset = d.len * (1 - p);
+    });
+    $('l-drop').style.opacity = time > 5600 ? 1 : 0;
+    fades.forEach(function(f){ f.el.classList.toggle('on', time >= f.t) });
+    var si = 0;
+    for (var i=0;i<stages.length;i++) if (time >= stages[i]) si = i;
+    btns.forEach(function(b,i){ b.classList.toggle('on', i <= si) });
+    dots.forEach(function(d,i){ d.classList.toggle('on', i <= si) });
+    var prog = Math.min(1, time / stages[stages.length-1]);
+    $('fill').style.width = 'calc(' + (prog*100) + '% - ' + (prog*8) + 'px)';
+  }
+
+  function frame(now){
+    if (last === null) last = now;
+    var dt = now - last; last = now;
+    if (playing){
+      t += dt;
+      if (t >= END){ t = END; playing = false; $('toggle').textContent = 'Replay'; }
+      apply(t);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  $('toggle').onclick = function(){
+    if (t >= END){ t = 0; playing = true; this.textContent = 'Pause'; return; }
+    playing = !playing; this.textContent = playing ? 'Pause' : 'Play';
+  };
+  $('replay').onclick = function(){ t = 0; playing = true; $('toggle').textContent = 'Pause'; };
+  btns.forEach(function(b){
+    b.onclick = function(){ t = stages[+b.dataset.i]; playing = false; $('toggle').textContent = 'Play'; apply(t); };
+  });
+
+  var seek = /[?&#]t=(\d+)/.exec(location.href);
+  if (seek){ t = Math.min(END, +seek[1]); playing = false; $('toggle').textContent = 'Play'; apply(t); }
+  else if (reduce){ t = END; apply(END); $('toggle').textContent = 'Play'; }
+  else apply(0);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

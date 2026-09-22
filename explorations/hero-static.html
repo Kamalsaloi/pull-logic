@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Pull Logic Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+--font-display:'Geist',sans-serif; --font-mono:'Geist Mono',monospace;
+--color-ground:#0D0D0C; --color-panel:#131312; --color-surface:#191918; --color-surface-2:#201F1E;
+--color-line:#2B2A28; --color-line-soft:#1C1C1B;
+--color-text:#EDEDEA; --color-text-2:#B6B5B1; --color-muted:#8B8A85; --color-dim:#605F5A;
+--color-amber:#F5A524; --color-amber-ink:#1A1206; --color-amber-soft:rgba(245,165,36,0.12); --color-amber-line:rgba(245,165,36,0.38);
+--color-risk:#E3594B; --color-risk-soft:rgba(227,89,75,0.10); --color-risk-line:rgba(227,89,75,0.34);
+--radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-pill:999px;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--color-ground);font-family:var(--font-display);color:var(--color-text);}
+.artboard{width:1440px;display:flex;flex-direction:column;background:var(--color-ground);overflow:hidden;}
+</style></head>
+<body><div class="artboard">
+
+<!-- NAV -->
+<div style="display:flex;align-items:center;justify-content:space-between;width:100%;height:72px;padding:0 112px;border-bottom:1px solid var(--color-line-soft);flex-shrink:0;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="0.5" y="0.5" width="19" height="19" rx="4.5" stroke="#33322F"/><rect x="4" y="9" width="4.5" height="7" rx="1.5" fill="var(--color-amber)"/><rect x="11.5" y="4" width="4.5" height="12" rx="1.5" fill="#5F5E5A"/></svg>
+    <span style="font-size:17px;font-weight:600;letter-spacing:-0.02em;color:var(--color-text);">Pull Logic</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:30px;">
+    <span style="font-size:14px;color:var(--color-text-2);">Platform</span><span style="font-size:14px;color:var(--color-text-2);">How it works</span><span style="font-size:14px;color:var(--color-text-2);">Industries</span><span style="font-size:14px;color:var(--color-text-2);">Resources</span><span style="font-size:14px;color:var(--color-text-2);">Company</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <span style="font-size:14px;color:var(--color-muted);">Log in</span>
+    <div style="display:flex;align-items:center;padding:9px 16px;border:1px solid var(--color-line);border-radius:var(--radius-sm);"><span style="font-size:14px;font-weight:500;color:var(--color-text);">Book a demo</span></div>
+  </div>
+</div>
+
+<!-- ANNOUNCEMENT RIBBON -->
+<div style="position:relative;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:48px;padding:0 112px;background-color:#141413;border-bottom:1px solid var(--color-line-soft);flex-shrink:0;">
+  <div style="display:flex;align-items:center;gap:7px;padding:3px 9px;border:1px solid var(--color-amber-line);border-radius:var(--radius-pill);background-color:var(--color-amber-soft);">
+    <div style="width:5px;height:5px;border-radius:999px;background-color:var(--color-amber);"></div>
+    <span style="font-size:10px;font-weight:600;letter-spacing:0.10em;color:var(--color-amber);">ANNOUNCEMENT</span>
+  </div>
+  <span style="font-size:13px;color:var(--color-text-2);">NAED selects Pull Logic and IDEA to build ProjectNexus, industry-owned order visibility for the electrical channel.</span>
+  <span style="font-size:13px;font-weight:500;color:var(--color-amber);">Read it &rarr;</span>
+  <div style="position:absolute;right:112px;top:17px;"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 2.5L10.5 10.5M10.5 2.5L2.5 10.5" stroke="#605F5A" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+</div>
+
+<!-- COPY BLOCK -->
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:22px;width:100%;padding:76px 112px 0;flex-shrink:0;">
+  <span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-muted);">AI-NATIVE SUPPLY CHAIN DECISIONS</span>
+  <div style="display:flex;flex-direction:column;align-items:flex-start;">
+    <span style="font-size:72px;font-weight:600;letter-spacing:-0.03em;line-height:69px;color:var(--color-text);white-space:nowrap;">You have the inventory.</span>
+    <span style="font-size:72px;font-weight:600;letter-spacing:-0.03em;line-height:69px;color:var(--color-text);white-space:nowrap;">It&rsquo;s in the wrong place.</span>
+  </div>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;width:100%;margin-top:10px;">
+    <span style="width:596px;font-size:19px;font-weight:400;line-height:30px;color:var(--color-text-2);">Pull Logic watches every SKU at every location, catches the availability gaps days before they cost you an order, then fixes them inside the ERP you already run: replenish, rebalance, allocate, substitute.</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;padding:13px 22px;border-radius:var(--radius-sm);background-color:var(--color-amber);"><span style="font-size:15px;font-weight:600;color:var(--color-amber-ink);">Book a demo</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:13px 20px;border:1px solid var(--color-line);border-radius:var(--radius-sm);"><span style="font-size:15px;font-weight:500;color:var(--color-text);">See how it works</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div style="display:flex;flex-direction:column;width:100%;padding:70px 112px 0;flex-shrink:0;">
+ <div style="display:flex;flex-direction:column;width:100%;background-color:var(--color-panel);border:1px solid var(--color-line);border-radius:var(--radius-lg);overflow:hidden;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;height:50px;padding:0 24px;border-bottom:1px solid var(--color-line-soft);background-color:#161615;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div style="width:6px;height:6px;border-radius:999px;background-color:var(--color-amber);"></div>
+      <span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-text);">ONE DECISION, START TO FINISH</span>
+      <span style="font-size:11px;letter-spacing:0.04em;color:var(--color-dim);">&middot; no human in the loop</span>
+    </div>
+    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.02em;color:var(--color-dim);">DENVER DC &middot; 14:32:07 CT</span>
+  </div>
+
+  <!-- STAGE RAIL -->
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;padding:24px 24px 0;">
+    <div style="display:flex;flex-direction:column;gap:11px;width:248px;flex-shrink:0;"><div style="width:100%;height:2px;background-color:rgba(245,165,36,0.45);"></div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--color-amber);">01</span><span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-text);">SIGNAL</span></div><span style="font-size:11px;color:var(--color-dim);">every feed, continuously</span></div>
+    <div style="display:flex;flex-direction:column;gap:11px;width:272px;flex-shrink:0;"><div style="width:100%;height:2px;background-color:rgba(245,165,36,0.45);"></div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--color-amber);">02</span><span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-text);">RISK</span></div><span style="font-size:11px;color:var(--color-dim);">found before it lands</span></div>
+    <div style="display:flex;flex-direction:column;gap:11px;width:336px;flex-shrink:0;"><div style="width:100%;height:2px;background-color:rgba(245,165,36,0.45);"></div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--color-amber);">03</span><span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-text);">DECISION</span></div><span style="font-size:11px;color:var(--color-dim);">options weighed, one chosen</span></div>
+    <div style="display:flex;flex-direction:column;gap:11px;width:250px;flex-shrink:0;"><div style="width:100%;height:2px;background-color:rgba(245,165,36,0.45);"></div><div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--color-amber);">04</span><span style="font-size:11px;font-weight:600;letter-spacing:0.10em;color:var(--color-text);">ACTION</span></div><span style="font-size:11px;color:var(--color-dim);">written back to your ERP</span></div>
+  </div>
+
+  <!-- CONTENT ROW -->
+  <div style="display:flex;align-items:stretch;gap:20px;width:100%;padding:18px 24px 26px;">
+
+    <div style="display:flex;flex-direction:column;width:248px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;border-bottom:1px solid var(--color-line-soft);"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--color-dim);width:30px;flex-shrink:0;">POS</span><span style="font-size:12px;color:var(--color-text-2);">Denver sell-through +23%</span></div>
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;border-bottom:1px solid var(--color-line-soft);"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--color-dim);width:30px;flex-shrink:0;">ASN</span><span style="font-size:12px;color:var(--color-text-2);">SUP-2291 lead time +9d</span></div>
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;border-bottom:1px solid var(--color-line-soft);"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--color-dim);width:30px;flex-shrink:0;">ORD</span><span style="font-size:12px;color:var(--color-text-2);">41 open, promised Oct 2</span></div>
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;border-bottom:1px solid var(--color-line-soft);"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--color-dim);width:30px;flex-shrink:0;">INV</span><span style="font-size:12px;color:var(--color-text-2);">4471-A, 312 on hand</span></div>
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;border-bottom:1px solid var(--color-line-soft);"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--color-dim);width:30px;flex-shrink:0;">NET</span><span style="font-size:12px;color:var(--color-text-2);">Kansas City, 860 free</span></div>
+      <div style="display:flex;align-items:center;gap:10px;width:100%;height:30px;"><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:#3A3937;width:30px;flex-shrink:0;">+++</span><span style="font-size:12px;color:#4A4945;">18,406 more this hour</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:13px;width:272px;flex-shrink:0;padding:15px 16px;background-color:var(--color-surface);border:1px solid var(--color-risk-line);border-radius:var(--radius-md);">
+      <div style="display:flex;align-items:center;gap:7px;"><div style="width:5px;height:5px;border-radius:999px;background-color:var(--color-risk);"></div><span style="font-size:10px;font-weight:600;letter-spacing:0.10em;color:var(--color-risk);">AVAILABILITY RISK</span></div>
+      <div style="display:flex;align-items:baseline;gap:8px;"><span style="font-family:var(--font-mono);font-size:16px;font-weight:500;color:var(--color-text);">4471-A</span><span style="font-size:12px;color:var(--color-muted);">Denver DC</span></div>
+      <span style="font-size:15px;font-weight:600;letter-spacing:-0.01em;color:var(--color-text);">Stockout in 6 days</span>
+      <div style="display:flex;flex-direction:column;gap:7px;width:100%;">
+        <div style="display:flex;align-items:center;width:100%;height:5px;border-radius:999px;background-color:#2B2A28;overflow:hidden;"><div style="width:40%;height:5px;background-color:var(--color-risk);"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span style="font-size:11px;color:var(--color-muted);">6d cover</span><span style="font-size:11px;color:var(--color-dim);">15d to resupply</span></div>
+      </div>
+      <div style="width:100%;height:1px;background-color:var(--color-line);"></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;width:100%;"><span style="font-size:11px;color:var(--color-muted);">41 orders exposed</span><span style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--color-text);">$84,200</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:336px;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;gap:12px;width:100%;padding:13px 14px;background-color:var(--color-amber-soft);border:1px solid var(--color-amber-line);border-radius:var(--radius-md);">
+        <div style="display:flex;flex-direction:column;gap:5px;flex-grow:1;"><span style="font-size:13px;font-weight:600;color:var(--color-text);">Rebalance 340 units from Kansas City</span><span style="font-size:11px;color:var(--color-text-2);">arrives day 2 &middot; $310 freight &middot; service level held</span></div>
+        <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;color:var(--color-amber);flex-shrink:0;">CHOSEN</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--color-line-soft);border-radius:var(--radius-md);">
+        <div style="display:flex;flex-direction:column;gap:5px;flex-grow:1;"><span style="font-size:13px;font-weight:500;color:var(--color-muted);">Expedite from SUP-2291</span><span style="font-size:11px;color:var(--color-dim);">$4,200 freight and still 7 days late</span></div>
+        <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;color:#4A4945;flex-shrink:0;">COSTLIER</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--color-line-soft);border-radius:var(--radius-md);">
+        <div style="display:flex;flex-direction:column;gap:5px;flex-grow:1;"><span style="font-size:13px;font-weight:500;color:var(--color-muted);">Substitute to 4471-B</span><span style="font-size:11px;color:var(--color-dim);">2 accounts contract-blocked</span></div>
+        <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;color:#4A4945;flex-shrink:0;">BLOCKED</span>
+      </div>
+      <span style="font-size:11px;color:var(--color-dim);padding-top:3px;">Ranked on cost to serve, then promise date.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;width:250px;flex-shrink:0;padding:15px 16px;background-color:var(--color-surface);border:1px solid var(--color-line);border-radius:var(--radius-md);">
+      <div style="display:flex;align-items:center;gap:7px;padding:4px 9px;background-color:var(--color-amber);border-radius:var(--radius-sm);align-self:flex-start;"><svg width="9" height="8" viewBox="0 0 9 8" fill="none"><path d="M1 4.2L3.3 6.5L8 1.5" stroke="#1A1206" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:10px;font-weight:700;letter-spacing:0.08em;color:var(--color-amber-ink);">EXECUTED</span></div>
+      <div style="display:flex;flex-direction:column;gap:5px;"><span style="font-family:var(--font-mono);font-size:15px;font-weight:500;color:var(--color-text);">TO-88412</span><span style="font-size:12px;color:var(--color-text-2);">Transfer order written to SAP</span></div>
+      <div style="width:100%;height:1px;background-color:var(--color-line);"></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:28px;font-weight:600;letter-spacing:-0.02em;color:var(--color-text);">$84,200</span><span style="font-size:12px;color:var(--color-muted);">revenue protected</span></div>
+      <div style="width:100%;height:1px;background-color:var(--color-line);"></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span style="font-size:11px;color:var(--color-dim);">signal to action</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-2);">2.4s</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><span style="font-size:11px;color:var(--color-dim);">people involved</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-2);">0</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;height:46px;padding:0 24px;border-top:1px solid var(--color-line-soft);background-color:#161615;">
+    <span style="font-size:12px;color:var(--color-muted);">Runs on top of SAP, Oracle, Infor and NetSuite. Nothing to rip out.</span>
+    <span style="font-size:12px;font-weight:500;color:var(--color-amber);">Open the full decision trace &rarr;</span>
+  </div>
+
+ </div>
+</div>
+<div style="height:64px;flex-shrink:0;"></div>
+</div></body></html>

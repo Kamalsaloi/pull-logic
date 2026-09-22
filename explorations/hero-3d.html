@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pull Logic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#0D0D0C; --panel:#131312; --line:#2B2A28; --line-soft:#1C1C1B;
+  --text:#EDEDEA; --text-2:#B6B5B1; --muted:#8B8A85; --dim:#82817C;
+  --amber:#F5A524; --amber-ink:#1A1206; --risk:#E3594B;
+  --sans:'Schibsted Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1440px;margin:0 auto}
+.pad{padding:0 112px}
+@media(max-width:900px){.pad{padding:0 24px}}
+nav{display:flex;align-items:center;justify-content:space-between;height:72px;border-bottom:1px solid var(--line-soft)}
+.navlinks{display:flex;gap:30px}
+.navlinks a,.navright a{color:var(--text-2);text-decoration:none;font-size:14px}
+.navright{display:flex;align-items:center;gap:20px}
+.ghost{border:1px solid var(--line);border-radius:6px;padding:9px 16px;color:var(--text);font-size:14px;text-decoration:none}
+.ribbon{display:flex;align-items:center;justify-content:center;gap:12px;height:48px;background:#141413;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--text-2);position:relative}
+.ribbon a{color:var(--amber);text-decoration:none;font-weight:500}
+.ribbon button{position:absolute;right:112px;background:none;border:0;color:var(--dim);cursor:pointer;font-size:15px;line-height:1}
+h1{font-size:72px;font-weight:600;letter-spacing:-.03em;line-height:.96;margin-top:72px}
+@media(max-width:900px){h1{font-size:40px}}
+.sub{display:flex;align-items:flex-end;justify-content:space-between;gap:48px;margin-top:28px;flex-wrap:wrap}
+.sub p{max-width:600px;font-size:19px;line-height:30px;color:var(--text-2)}
+.ctas{display:flex;gap:12px}
+.btn{border-radius:6px;padding:13px 22px;font-size:15px;font-weight:600;text-decoration:none;background:var(--amber);color:var(--amber-ink)}
+.btn.sec{background:none;border:1px solid var(--line);color:var(--text);font-weight:500}
+
+.panel{margin-top:60px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.phead{display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 24px;border-bottom:1px solid var(--line-soft);background:#161615;font-size:13px}
+.phead .id{font-weight:500}.phead .loc{color:var(--dim);margin-left:8px}
+.phead time{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.spine{padding:24px 24px 0}
+.spinebar{position:relative;height:9px}
+.spinebar .rail{position:absolute;top:4px;left:4px;right:4px;height:1px;background:var(--line)}
+.spinebar .fill{position:absolute;top:4px;left:4px;height:1px;background:var(--amber);width:0}
+.stages{display:flex;margin-top:10px}
+.stage{flex:1;background:none;border:0;padding:0;text-align:left;font-family:inherit;font-size:14px;font-weight:500;color:#4F4E4A;cursor:pointer;transition:color .35s}
+.stage:last-child{flex:0 0 auto}
+.stage.on{color:var(--text)}
+.dot{position:absolute;top:.5px;width:8px;height:8px;border-radius:50%;background:#2B2A28;transition:background .3s}
+.dot.on{background:var(--amber)}
+.scene{padding:0 24px}
+svg{display:block;width:100%;height:auto}
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:24px;height:46px;padding:0 24px;border-top:1px solid var(--line-soft);background:#161615;font-size:12px;color:var(--muted)}
+.pfoot .out{opacity:0;transition:opacity .5s}.pfoot .out.on{opacity:1}
+.pfoot .amt{color:var(--text);font-family:var(--mono)}
+.pfoot a{color:var(--amber);text-decoration:none;font-weight:500;white-space:nowrap}
+.controls{display:flex;align-items:center;gap:14px;margin-top:16px}
+.controls button{background:none;border:1px solid var(--line);border-radius:6px;color:var(--text-2);font-family:inherit;font-size:12px;padding:6px 12px;cursor:pointer}
+.controls button:hover{color:var(--text);border-color:#3A3937}
+.controls .note{font-size:12px;color:var(--dim)}
+.tail{height:88px}
+</style></head>
+<body>
+<div class="wrap">
+
+<nav class="pad">
+  <div style="display:flex;align-items:center;gap:10px;white-space:nowrap">
+    <svg width="20" height="20" viewBox="0 0 20 20"><rect x=".5" y=".5" width="19" height="19" rx="4.5" fill="none" stroke="#33322F"/><rect x="4" y="9" width="4.5" height="7" rx="1.5" fill="#F5A524"/><rect x="11.5" y="4" width="4.5" height="12" rx="1.5" fill="#5F5E5A"/></svg>
+    <span style="font-size:17px;font-weight:600;letter-spacing:-.02em">Pull Logic</span>
+  </div>
+  <div class="navlinks"><a href="#">Platform</a><a href="#">How it works</a><a href="#">Industries</a><a href="#">Resources</a><a href="#">Company</a></div>
+  <div class="navright"><a href="#" style="color:var(--muted)">Log in</a><a href="#" class="ghost">Book a demo</a></div>
+</nav>
+
+<div class="ribbon">
+  NAED selects Pull Logic and IDEA to build ProjectNexus, industry-owned order visibility for the electrical channel.
+  <a href="#">Read it &rarr;</a>
+  <button aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>
+</div>
+
+<main class="pad">
+  <h1>You have the inventory.<br>It&rsquo;s in the wrong place.</h1>
+  <div class="sub">
+    <p>Pull Logic watches every SKU at every location, catches the availability gaps days before they cost you an order, then fixes them inside the ERP you already run: replenish, rebalance, allocate, substitute.</p>
+    <div class="ctas"><a class="btn" href="#">Book a demo</a><a class="btn sec" href="#">See how it works</a></div>
+  </div>
+
+  <section class="panel">
+    <div class="phead"><div><span class="id">Decision 4471-A</span><span class="loc">network of 5 DCs</span></div><time>14:32:07 CT, today</time></div>
+    <div class="spine">
+      <div class="spinebar" id="bar"><div class="rail"></div><div class="fill" id="fill"></div></div>
+      <div class="stages">
+        <button class="stage" data-i="0">Signal</button>
+        <button class="stage" data-i="1">Risk</button>
+        <button class="stage" data-i="2">Decision</button>
+        <button class="stage" data-i="3">Action</button>
+      </div>
+    </div>
+    <div class="scene">
+      <svg id="svg" viewBox="0 0 1118 444" role="img"
+        aria-label="An isometric map of five distribution centres. Column height is days of inventory cover. Kansas City holds 34 days while Denver holds 6 and is running out. Pull Logic moves 340 units from Kansas City to Denver, raising Denver to 22 days."></svg>
+    </div>
+    <div class="pfoot">
+      <span class="out" id="out">Transfer order <span class="amt">TO-88412</span> written to SAP. <span class="amt">$84,200</span> of orders held.</span>
+      <a href="#">See the decision trace &rarr;</a>
+    </div>
+  </section>
+
+  <div class="controls">
+    <button id="toggle">Pause</button><button id="replay">Replay</button>
+    <span class="note">Runs once. Nothing here moves on a timer you can&rsquo;t stop.</span>
+  </div>
+  <div class="tail"></div>
+</main>
+</div>
+
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg", svg=document.getElementById("svg");
+var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+function grp(){return document.createElementNS(NS,"g")}
+
+// ---- isometric projection -------------------------------------------------
+var TILE=120, CX=0.866, CY=0.42, HS=4.5, W=0.26, OX=361, OY=96;
+function iso(gx,gy,h){ return { x: OX+(gx-gy)*TILE*CX, y: OY+(gx+gy)*TILE*CY-(h||0)*HS } }
+function corners(gx,gy,h){
+  var c=iso(gx,gy,h), ex=W*2*TILE*CX, ey=W*2*TILE*CY;
+  return { N:{x:c.x,y:c.y-ey}, E:{x:c.x+ex,y:c.y}, S:{x:c.x,y:c.y+ey}, Wp:{x:c.x-ex,y:c.y} };
+}
+function pts(a){ return a.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1)}).join(" ") }
+
+// ---- the network ----------------------------------------------------------
+var NODES=[
+  {k:"sea", name:"Seattle",     gx:-0.8, gy:0.6, cover:11},
+  {k:"den", name:"Denver",      gx:1.5, gy: 1.8, cover:6,  short:true},
+  {k:"dal", name:"Dallas",      gx:2.0, gy: 3.6, cover:19},
+  {k:"kc",  name:"Kansas City", gx:3.6, gy: 0.9, cover:34, rich:true},
+  {k:"chi", name:"Chicago",     gx:5.0, gy:-0.2, cover:21}
+];
+// painter's order: draw back-to-front so the extrusions overlap correctly
+NODES.sort(function(a,b){ return (a.gx+a.gy)-(b.gx+b.gy) });
+
+// ground grid
+var gGrid=grp(); svg.appendChild(gGrid);
+for(var i=-1;i<=6;i++){
+  var a=iso(i,-1,0), b=iso(i,4.6,0);
+  gGrid.appendChild(el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#1E1D1C","stroke-width":1}));
+  var c=iso(-1,i,0), d=iso(6,i,0);
+  gGrid.appendChild(el("line",{x1:c.x,y1:c.y,x2:d.x,y2:d.y,stroke:"#1E1D1C","stroke-width":1}));
+}
+gGrid.setAttribute("opacity",0);
+
+var gArc=grp(), gNode=grp(), gLabel=grp();
+svg.appendChild(gArc); svg.appendChild(gNode); svg.appendChild(gLabel);
+
+// build each DC as an extruded prism
+NODES.forEach(function(n){
+  n.g=grp(); gNode.appendChild(n.g);
+  n.footprint=el("polygon",{fill:"#191817",stroke:"#232221","stroke-width":1});
+  n.left =el("polygon",{stroke:"none"});
+  n.right=el("polygon",{stroke:"none"});
+  n.top  =el("polygon",{stroke:"none"});
+  n.g.appendChild(n.footprint); n.g.appendChild(n.left); n.g.appendChild(n.right); n.g.appendChild(n.top);
+
+  n.nameEl=el("text",{"font-size":n.k==="den"?13:12,fill:n.k==="den"?"#B6B5B1":"#82817C","text-anchor":"middle","font-family":"Schibsted Grotesk","font-weight":n.k==="den"?500:400});
+  n.nameEl.textContent=n.name;
+  n.coverEl=el("text",{"font-size":12,fill:"#605F5A","text-anchor":"middle","font-family":"IBM Plex Mono"});
+  gLabel.appendChild(n.nameEl); gLabel.appendChild(n.coverEl);
+  n.h=0; n.tone="idle";
+});
+
+var TONE={
+  idle:{top:"#3A3835",right:"#262523",left:"#1C1B1A"},
+  risk:{top:"#E3594B",right:"#8E3A32",left:"#5E2823"},
+  rich:{top:"#4A4844",right:"#302E2B",left:"#212020"},
+  fixed:{top:"#F5A524",right:"#9A6816",left:"#63430E"}
+};
+function drawNode(n){
+  var b=corners(n.gx,n.gy,0), t=corners(n.gx,n.gy,n.h), c=TONE[n.tone];
+  n.footprint.setAttribute("points",pts([b.N,b.E,b.S,b.Wp]));
+  n.left .setAttribute("points",pts([t.Wp,t.S,b.S,b.Wp]));
+  n.right.setAttribute("points",pts([t.S,t.E,b.E,b.S]));
+  n.top  .setAttribute("points",pts([t.N,t.E,t.S,t.Wp]));
+  n.left.setAttribute("fill",c.left); n.right.setAttribute("fill",c.right); n.top.setAttribute("fill",c.top);
+  var lab=iso(n.gx,n.gy,0);
+  n.nameEl.setAttribute("x",lab.x); n.nameEl.setAttribute("y",lab.y+ (W*2*TILE*CY) + 18);
+  n.coverEl.setAttribute("x",lab.x); n.coverEl.setAttribute("y",lab.y+ (W*2*TILE*CY) + 34);
+  n.coverEl.textContent = Math.round(n.h) + "d cover";
+}
+
+// candidate lanes into Denver
+var den=NODES.filter(function(n){return n.k==="den"})[0];
+function arcPath(from,to){
+  var a=iso(from.gx,from.gy,from.cover), b=iso(to.gx,to.gy,26);
+  var mx=(a.x+b.x)/2, my=(a.y+b.y)/2-92;
+  return "M"+a.x.toFixed(1)+" "+a.y.toFixed(1)+" Q"+mx.toFixed(1)+" "+my.toFixed(1)+" "+b.x.toFixed(1)+" "+b.y.toFixed(1);
+}
+var CAND=[
+  {k:"kc",  label:"340 units, 2 days, $310",        chosen:true},
+  {k:"dal", label:"340 units, 4 days, $980",        chosen:false},
+  {k:"chi", label:"contract blocks 2 accounts",     chosen:false}
+];
+CAND.forEach(function(c){
+  var src=NODES.filter(function(n){return n.k===c.k})[0];
+  c.src=src;
+  c.path=el("path",{d:arcPath(src,den),fill:"none",
+    stroke:c.chosen?"#F5A524":"#4A4844","stroke-width":c.chosen?2:1.25,
+    "stroke-dasharray":c.chosen?"":"4 5"});
+  gArc.appendChild(c.path);
+  c.len=c.path.getTotalLength();
+  c.path.style.strokeDasharray=c.chosen?c.len:"4 5";
+  if(c.chosen) c.path.style.strokeDashoffset=c.len;
+  c.path.setAttribute("opacity",0);
+  c.text=el("text",{"font-size":12,fill:c.chosen?"#F5A524":"#6F6E69","font-family":"Schibsted Grotesk",opacity:0});
+  c.text.textContent=c.label;
+  var AT={kc:[0.50,-13],dal:[0.30,18],chi:[0.72,-15]}[c.k];
+  var m=c.path.getPointAtLength(c.len*AT[0]);
+  c.text.setAttribute("x",m.x); c.text.setAttribute("y",m.y+AT[1]);
+  c.text.setAttribute("text-anchor","middle");
+  gLabel.appendChild(c.text);
+});
+
+// the unit that actually travels
+var packet=el("circle",{r:5,fill:"#F5A524",opacity:0}); gLabel.appendChild(packet);
+var chosen=CAND[0];
+
+// callouts
+function callout(txt,color){var t=el("text",{"font-size":13,fill:color,"font-family":"Schibsted Grotesk","text-anchor":"middle",opacity:0});t.textContent=txt;gLabel.appendChild(t);return t}
+var cRisk=callout("6 days of cover, 41 orders exposed","#E3594B");
+var cRich=callout("34 days sitting here","#8B8A85");
+var cFix =callout("+340 units, on the shelf day 2","#F5A524");
+var kc=NODES.filter(function(n){return n.k==="kc"})[0];
+function placeCallouts(){
+  var d=iso(den.gx,den.gy,den.h); cRisk.setAttribute("x",d.x); cRisk.setAttribute("y",d.y-22);
+  cFix.setAttribute("x",d.x); cFix.setAttribute("y",d.y-22);
+  var k=iso(kc.gx,kc.gy,kc.h); cRich.setAttribute("x",k.x+46); cRich.setAttribute("y",k.y-14); cRich.setAttribute("text-anchor","start");
+}
+
+// ---- timeline -------------------------------------------------------------
+var STAGES=[0,1700,3200,5200], END=8400;
+var btns=[].slice.call(document.querySelectorAll(".stage"));
+var bar=document.getElementById("bar");
+var dots=STAGES.map(function(_,i){var d=document.createElement("div");d.className="dot";
+  d.style.left=(i/(STAGES.length-1)*100)+"%"; if(i===STAGES.length-1)d.style.marginLeft="-8px";
+  bar.appendChild(d); return d});
+
+function ease(p){return p<0?0:p>1?1:1-Math.pow(1-p,3)}
+function seg(t,a,b){return ease((t-a)/(b-a))}
+
+function apply(t){
+  gGrid.setAttribute("opacity", seg(t,0,700)*1);
+
+  // 1 signal: every location reports, columns rise
+  NODES.forEach(function(n,i){
+    var a=250+i*130, p=seg(t,a,a+750);
+    var target=n.cover;
+    // 4 action: Denver grows once the transfer lands
+    if(n===den && t>5900) target = 6 + 16*ease((t-5900)/900);
+    n.h = target*p;
+    n.tone = (n===den) ? (t>5900 ? "fixed" : (t>1900 ? "risk":"idle"))
+                       : (n.rich && t>1900 ? "rich" : "idle");
+    drawNode(n);
+    n.nameEl.setAttribute("opacity", p);
+    n.coverEl.setAttribute("opacity", p*0.9);
+  });
+  placeCallouts();
+
+  // 2 risk
+  cRisk.setAttribute("opacity", t>5600 ? 0 : seg(t,2000,2600));
+  cRich.setAttribute("opacity", seg(t,2300,2900));
+
+  // 3 decision: three lanes weighed, two dropped
+  CAND.forEach(function(c,i){
+    var a=3300+i*260;
+    var appear=seg(t,a,a+600);
+    var drop = c.chosen ? 0 : seg(t,4900,5500);
+    c.path.setAttribute("opacity", appear*(1-drop*0.82));
+    c.text.setAttribute("opacity", appear*(1-drop));
+    if(c.chosen) c.path.style.strokeDashoffset = c.len*(1-seg(t,3300,4200));
+  });
+
+  // 4 action: the unit travels the chosen lane
+  var pk=(t-5200)/700;
+  if(pk>0&&pk<=1){ var pt=chosen.path.getPointAtLength(chosen.len*ease(pk));
+    packet.setAttribute("cx",pt.x); packet.setAttribute("cy",pt.y); packet.setAttribute("opacity",1) }
+  else packet.setAttribute("opacity",0);
+  cFix.setAttribute("opacity", seg(t,6000,6600));
+  document.getElementById("out").classList.toggle("on", t>=6800);
+
+  var si=0; for(var i=0;i<STAGES.length;i++) if(t>=STAGES[i]) si=i;
+  btns.forEach(function(b,i){b.classList.toggle("on",i<=si)});
+  dots.forEach(function(d,i){d.classList.toggle("on",i<=si)});
+  var pr=Math.min(1,t/STAGES[STAGES.length-1]);
+  document.getElementById("fill").style.width="calc("+(pr*100)+"% - "+(pr*8)+"px)";
+}
+
+var t=0,last=null,playing=!reduce;
+function frame(now){ if(last===null)last=now; var dt=now-last; last=now;
+  if(playing){ t+=dt; if(t>=END){t=END;playing=false;document.getElementById("toggle").textContent="Replay"} apply(t) }
+  requestAnimationFrame(frame) }
+document.getElementById("toggle").onclick=function(){
+  if(t>=END){t=0;playing=true;this.textContent="Pause";return}
+  playing=!playing; this.textContent=playing?"Pause":"Play" };
+document.getElementById("replay").onclick=function(){t=0;playing=true;document.getElementById("toggle").textContent="Pause"};
+btns.forEach(function(b){b.onclick=function(){t=STAGES[+b.dataset.i];playing=false;
+  document.getElementById("toggle").textContent="Play";apply(t)}});
+
+var seek=/[?&#]t=(\d+)/.exec(location.href);
+if(seek){t=Math.min(END,+seek[1]);playing=false;document.getElementById("toggle").textContent="Play";apply(t)}
+else if(reduce){t=END;apply(END);document.getElementById("toggle").textContent="Play"}
+else apply(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body></html>
