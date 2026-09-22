@@ -370,117 +370,107 @@ h1{font-size:clamp(34px,5.4vw,72px);font-weight:600;letter-spacing:-.03em;
 
 <script>
 (function(){
-  var panel=document.querySelector('.panel'), replay=document.getElementById('replay');
+  var panel=document.querySelector('.panel'), btn=document.getElementById('replay');
   if(!panel) return;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)');
-
   var q=function(sel,root){return Array.prototype.slice.call((root||panel).querySelectorAll(sel))};
   var EASE='cubic-bezier(.22,.61,.36,1)';
-  var running=[], started=false;
+  var RUN=4400, HOLD=6500;                 // reveal, then a long hold so it stays readable
+  var running=[], cycle=null, guard=null;
+  var paused=false, onScreen=true, hovering=false;
 
-  function enter(el,delay,dx){
-    return el.animate(
-      [{opacity:0,transform:'translateX('+(dx==null?-14:dx)+'px)'},{opacity:1,transform:'none'}],
-      {duration:440,delay:delay,easing:EASE,fill:'backwards'});
-  }
-  function draw(path,delay,dur){
-    var len;
-    try{ len=path.getTotalLength() }catch(e){ return null }
-    if(!len) return null;
-    return path.animate(
-      [{strokeDasharray:len+' '+len,strokeDashoffset:len},
-       {strokeDasharray:len+' '+len,strokeDashoffset:0}],
-      {duration:dur||620,delay:delay,easing:EASE,fill:'backwards'});
-  }
-  function pop(el,delay){
+  function enter(el,delay,dx){ if(!el) return null;
+    return el.animate([{opacity:0,transform:'translateX('+(dx==null?-14:dx)+'px)'},
+                       {opacity:1,transform:'none'}],
+      {duration:440,delay:delay,easing:EASE,fill:'backwards'}); }
+  function draw(path,delay,dur){ if(!path) return null;
+    var len; try{ len=path.getTotalLength() }catch(e){ return null } if(!len) return null;
+    return path.animate([{strokeDasharray:len+' '+len,strokeDashoffset:len},
+                         {strokeDasharray:len+' '+len,strokeDashoffset:0}],
+      {duration:dur||620,delay:delay,easing:EASE,fill:'backwards'}); }
+  function pop(el,delay){ if(!el) return null;
     return el.animate([{opacity:0},{opacity:1}],
-      {duration:320,delay:delay,easing:EASE,fill:'backwards'});
-  }
-  // a pulse that rides the connector so the eye is pulled rightward
-  function pulse(svg,delay){
-    var dot=svg.querySelector('circle:last-of-type');
-    if(!dot) return null;
-    return dot.animate(
-      [{transform:'translateX(-22px)',opacity:0,offset:0},
-       {transform:'translateX(-14px)',opacity:1,offset:.25},
-       {transform:'translateX(16px)',opacity:1,offset:.85},
-       {transform:'translateX(22px)',opacity:0,offset:1}],
-      {duration:620,delay:delay,easing:'cubic-bezier(.4,0,.5,1)',fill:'backwards'});
-  }
+      {duration:320,delay:delay,easing:EASE,fill:'backwards'}); }
+  function pulse(svg,delay){ if(!svg) return null;
+    var dot=svg.querySelector('circle:last-of-type'); if(!dot) return null;
+    return dot.animate([{transform:'translateX(-22px)',opacity:0,offset:0},
+                        {transform:'translateX(-14px)',opacity:1,offset:.25},
+                        {transform:'translateX(16px)',opacity:1,offset:.85},
+                        {transform:'translateX(22px)',opacity:0,offset:1}],
+      {duration:620,delay:delay,easing:'cubic-bezier(.4,0,.5,1)',fill:'backwards'}); }
 
   function play(){
-    running.forEach(function(a){try{a.cancel()}catch(e){}});
-    running=[];
+    running.forEach(function(a){try{a.cancel()}catch(e){}}); running=[];
     var add=function(a){ if(a) running.push(a) };
 
     q('.src').forEach(function(el,i){ add(enter(el,i*95)) });
 
     var cv=document.querySelector('.converge');
-    if(cv){
-      q('path',cv).forEach(function(pa,i){ add(draw(pa,400+i*45,640)) });
-      q('circle',cv).forEach(function(c){ add(pop(c,1010)) });
-    }
+    if(cv){ q('path',cv).forEach(function(pa,i){ add(draw(pa,400+i*45,640)) });
+            q('circle',cv).forEach(function(c){ add(pop(c,1010)) }); }
 
     var risk=document.querySelector('.card.risk');
-    if(risk){
-      add(enter(risk,1120));
+    if(risk){ add(enter(risk,1120));
       var sp=q('svg path',risk);
-      if(sp[0]) add(pop(sp[0],1520));            // area fill
-      if(sp[1]) add(draw(sp[1],1380,820));       // the line itself
-    }
+      add(pop(sp[0],1520)); add(draw(sp[1],1380,820)); }
 
     var c1=document.querySelector('.conn1');
     if(c1){ q('path',c1).forEach(function(pa){ add(draw(pa,2060,380)) }); add(pulse(c1,2140)); }
 
     var dec=document.querySelector('.card.decide');
-    if(dec){
-      add(enter(dec,2380));
-      add(pop(dec.querySelector('.chead'),2520));
+    if(dec){ add(enter(dec,2380)); add(pop(dec.querySelector('.chead'),2520));
       q('.opt',dec).forEach(function(o,i){ add(enter(o,2620+i*110,-8)) });
-      add(pop(dec.querySelector('.note'),3000));
-    }
+      add(pop(dec.querySelector('.note'),3000)); }
 
     var c2=document.querySelector('.conn2');
     if(c2){ q('path',c2).forEach(function(pa){ add(draw(pa,3120,380)) }); add(pulse(c2,3200)); }
 
-    // watchdog: the hidden state comes from the animations' backwards fill, so if the
-    // timeline ever stalls (throttled tab, odd engine) force the end state rather than
-    // leave the hero invisible. finish() is a no-op on animations already complete.
-    clearTimeout(window.__flowGuard);
-    window.__flowGuard=setTimeout(function(){
-      running.forEach(function(a){ try{ a.finish() }catch(e){} });
-    },5200);
-
     var act=document.querySelector('.card.act');
-    if(act){
-      add(enter(act,3440));
-      add(pop(act.querySelector('img'),3580));
+    if(act){ add(enter(act,3440)); add(pop(act.querySelector('img'),3580));
       add(enter(act.querySelector('.route'),3720,-8));
-      add(enter(act.querySelector('.tot'),3860,-8));
-    }
+      add(enter(act.querySelector('.tot'),3860,-8)); }
+
+    // never leave the hero hidden if the timeline stalls
+    clearTimeout(guard);
+    guard=setTimeout(function(){ running.forEach(function(a){try{a.finish()}catch(e){}}) }, RUN+900);
+
+    schedule();
   }
 
-  function enable(){
-    if(reduce.matches){ if(replay) replay.hidden=true; return }
-    if(replay){ replay.hidden=false; replay.addEventListener('click',play) }
-
-    function go(){ if(started) return; started=true; play() }
-
-    // autoplay: if any part of the panel is on screen at load, run straight away
-    var box=panel.getBoundingClientRect();
-    if(box.top < innerHeight && box.bottom > 0){ setTimeout(go,250); return }
-
-    // otherwise it is below the fold, so run the moment it first appears
-    if('IntersectionObserver' in window){
-      new IntersectionObserver(function(es,o){
-        es.forEach(function(e){ if(e.isIntersecting){ o.disconnect(); go() } });
-      },{threshold:.05}).observe(panel);
-    } else { go() }
+  // loop, but only when nobody is reading it and it is actually on screen
+  function schedule(){
+    clearTimeout(cycle);
+    cycle=setTimeout(function(){
+      if(paused||hovering||!onScreen||document.hidden){ schedule(); return }
+      play();
+    }, RUN+HOLD);
   }
-  enable();
-  reduce.addEventListener&&reduce.addEventListener('change',function(){
-    if(reduce.matches){ running.forEach(function(a){try{a.cancel()}catch(e){}}); if(replay) replay.hidden=true }
-  });
+
+  function setBtn(){ if(btn) btn.textContent = paused ? 'Play the decision' : 'Pause'; }
+
+  if(reduce.matches){ if(btn) btn.hidden=true; return }
+  if(btn){ btn.hidden=false; setBtn();
+    btn.addEventListener('click',function(){
+      paused=!paused; setBtn();
+      if(!paused) play(); else { clearTimeout(cycle); }
+    }); }
+
+  panel.addEventListener('mouseenter',function(){ hovering=true });
+  panel.addEventListener('mouseleave',function(){ hovering=false });
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){ onScreen=e.isIntersecting });
+    },{threshold:.05}).observe(panel);
+  }
+
+  var box=panel.getBoundingClientRect();
+  if(box.top<innerHeight && box.bottom>0) setTimeout(play,250);
+  else if('IntersectionObserver' in window){
+    var once=new IntersectionObserver(function(es,o){
+      es.forEach(function(e){ if(e.isIntersecting){ o.disconnect(); play() } });
+    },{threshold:.05}); once.observe(panel);
+  } else play();
 })();
 </script>
 </body></html>
